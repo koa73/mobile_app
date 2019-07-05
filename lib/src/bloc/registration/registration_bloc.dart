@@ -34,8 +34,15 @@ class RegBloc extends Bloc<RegEvent, RegState> {
         yield ValidationError(error: error);
 
       } else {
+
+        yield SwitchView(view: 'Back');
         yield ShowProgress(state: true);
-        _verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
+
+        Future.delayed(const Duration(milliseconds: 60000), (){
+          this.dispatch(TimeoutExcided());
+        });
+
+        //_verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
       }
     }
 
@@ -43,8 +50,10 @@ class RegBloc extends Bloc<RegEvent, RegState> {
       yield SwitchView(view: 'Front');
     }
 
-    if (event is VerificationCompleted){
-      yield SwitchView(view: 'Back');
+    if (event is VerificationCompleted){}
+
+    if (event is TimeoutExcided){
+      yield ShowProgress(state: false);
     }
   }
 
@@ -99,4 +108,5 @@ class RegBloc extends Bloc<RegEvent, RegState> {
         codeSent: codeSent,
         codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
   }
+
 }

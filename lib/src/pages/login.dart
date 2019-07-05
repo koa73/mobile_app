@@ -133,10 +133,9 @@ class _LoginPage extends State<LoginPage> {
     );
   }
 
-
   @override
   void initState() {
-    print("init");
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
     super.initState();
     _bloc = LoginBloc();
   }

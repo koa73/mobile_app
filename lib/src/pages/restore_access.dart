@@ -9,6 +9,7 @@ import '../widgets/rotating_cell.dart';
 import '../widgets/input_row.dart';
 import '../bloc/registration/registration.dart';
 import '../widgets/progress.dart';
+import '../widgets/keyboard_hider.dart';
 import '../globals.dart' as global;
 
 class RestorePage extends StatefulWidget {
@@ -17,7 +18,7 @@ class RestorePage extends StatefulWidget {
   _RestorePage createState() => _RestorePage();
 }
 
-class _RestorePage extends State<RestorePage> {
+class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
 
   final RegBloc _bloc = RegBloc();
   final TextEditingController _emailController = TextEditingController();
@@ -166,6 +167,7 @@ class _RestorePage extends State<RestorePage> {
                       vertical: 20.0, horizontal: 20.0),
                   color: global.highlightColor2,
                   onPressed: () {
+                    hideKeyboard();
                     _bloc.dispatch(Verify(
                       email: _emailController.text,
                       phone: _phoneController.text,

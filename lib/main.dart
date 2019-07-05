@@ -28,6 +28,7 @@ class SimpleBlocDelegate extends BlocDelegate {
   }
 }
 
+
 void main() {
 
   BlocSupervisor().delegate = SimpleBlocDelegate();
