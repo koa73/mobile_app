@@ -18,12 +18,18 @@ class RegBloc extends Bloc<RegEvent, RegState> {
   Stream<RegState> mapEventToState(RegEvent event) async* {
 
     if (event is Confirm){
-      if (_confirmValidate(event.code)){
-        yield NotValidValue();
-      } else { yield Success();}
-    }
 
-    if (event is Verify){
+      if (_confirmValidate(event.code)){
+
+        yield NotValidValue();
+
+      } else {
+        _showProgressWithTimeout();
+        yield Success();
+      }
+
+    } else if (event is Verify){
+
       Map<String, bool> error = new Map();
       error['email'] = _emailValidate(event.email);
       error['phone'] = _phoneValidate(event.phone);
@@ -36,13 +42,8 @@ class RegBloc extends Bloc<RegEvent, RegState> {
       } else {
 
         yield SwitchView(view: 'Back');
-        yield ShowProgress(state: true);
-
-        Future.delayed(const Duration(milliseconds: 60000), (){
-          this.dispatch(TimeoutExcided());
-        });
-
-        //_verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
+        yield _showProgressWithTimeout();
+        _verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
       }
     }
 
@@ -50,11 +51,9 @@ class RegBloc extends Bloc<RegEvent, RegState> {
       yield SwitchView(view: 'Front');
     }
 
-    if (event is VerificationCompleted){}
+    if (event is VerificationCompleted){  yield ShowProgress(state: false);}
 
-    if (event is TimeoutExcided){
-      yield ShowProgress(state: false);
-    }
+    if (event is TimeoutExcided){ yield ShowProgress(state: false);}
   }
 
   bool _emailValidate(String email){
@@ -80,6 +79,7 @@ class RegBloc extends Bloc<RegEvent, RegState> {
     final PhoneVerificationCompleted verificationCompleted =
         (AuthCredential phoneAuthCredential) {
       this.dispatch(VerificationCompleted());
+      print('Received phone auth credential: $phoneAuthCredential');
     };
 
     final PhoneVerificationFailed verificationFailed =
@@ -109,4 +109,13 @@ class RegBloc extends Bloc<RegEvent, RegState> {
         codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
   }
 
+  RegState _showProgressWithTimeout(){
+
+    Future.delayed(const Duration(milliseconds: 60000), (){
+      if (this.currentState.progress) {
+        this.dispatch(TimeoutExcided());
+      }
+    });
+    return ShowProgress(state: true);
+  }
 }

@@ -231,6 +231,7 @@ class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
                       vertical: 20.0, horizontal: 20.0),
                   color: global.highlightColor2,
                   onPressed: () {
+                    hideKeyboard();
                     _bloc.dispatch(Confirm(code: _confirmController.text));
                   },
                   child: Text(
