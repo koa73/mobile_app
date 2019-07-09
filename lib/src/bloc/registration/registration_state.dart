@@ -32,6 +32,7 @@ class ValidationError extends RegState {
 }
 
 class NotValidValue extends RegState {}
+class ValidValue extends RegState {}
 
 class ShowProgress extends  RegState {
 

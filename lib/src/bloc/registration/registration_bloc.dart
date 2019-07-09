@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:bloc/bloc.dart';
 
 import 'registration_event.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class RegBloc extends Bloc<RegEvent, RegState> {
 
+  final Map<String, String> _reqValue = new Map();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
@@ -24,8 +26,10 @@ class RegBloc extends Bloc<RegEvent, RegState> {
         yield NotValidValue();
 
       } else {
-        _showProgressWithTimeout();
-        yield Success();
+
+        yield ValidValue();
+        print(" Request : ${json.encode(_reqValue)}");
+        yield _showProgressWithTimeout(const Duration(milliseconds: 60000));
       }
 
     } else if (event is Verify){
@@ -42,7 +46,7 @@ class RegBloc extends Bloc<RegEvent, RegState> {
       } else {
 
         yield SwitchView(view: 'Back');
-        yield _showProgressWithTimeout();
+        yield _showProgressWithTimeout(const Duration(milliseconds: 45000));
         _verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
       }
     }
@@ -58,20 +62,23 @@ class RegBloc extends Bloc<RegEvent, RegState> {
 
   bool _emailValidate(String email){
     final RegExp exp = new RegExp(r'^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$');
+    _reqValue['email'] = email;
     return !exp.hasMatch(email);
   }
 
   bool _phoneValidate(String phone){
-    return phone.replaceAll(new RegExp(r'\D'), '').length != 11;
-
+    _reqValue['phone'] = phone.replaceAll(new RegExp(r'\D'), '');
+    return _reqValue['phone'].length != 11;
   }
 
   bool _passwordValidate(String password){
-    return password.replaceAll(new RegExp(r'\D'), '').length != 5;
+    _reqValue['password'] = password.replaceAll(new RegExp(r'\D'), '');
+    return _reqValue['password'].length != 5;
   }
 
   bool _confirmValidate(String code){
-    return code.replaceAll(new RegExp(r'\D'), '').length != 5;
+    _reqValue['code'] = code.replaceAll(new RegExp(r'\D'), '');
+    return _reqValue['code'].length != 5;
   }
 
   _verifyPhoneNumber(String phoneNumber) async {
@@ -109,10 +116,12 @@ class RegBloc extends Bloc<RegEvent, RegState> {
         codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
   }
 
-  RegState _showProgressWithTimeout(){
+  RegState _showProgressWithTimeout(_timout){
 
-    Future.delayed(const Duration(milliseconds: 60000), (){
+    Future.delayed(_timout, (){
+      print(1);
       if (this.currentState.progress) {
+        print(2);
         this.dispatch(TimeoutExcided());
       }
     });
