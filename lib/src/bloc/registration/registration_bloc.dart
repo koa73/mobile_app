@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../event.dart';
 import '../state.dart';
+import '../../client/auth_api.dart';
 import '../../security/password.dart';
 
 
@@ -35,12 +36,11 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
         yield _showProgressWithTimeout(60);
         _signInWithPhoneNumber()
             .then((String credential){
-              print("Credentials : $credential");
               _reqValue['credential'] = credential;
-              print(" Request : ${json.encode(_reqValue)}");
-        })
-            .catchError((e) => this.dispatch(Error(error: e.toString())));
 
+              print(" Request : ${json.encode(_reqValue)}");
+
+        }).catchError((e) => this.dispatch(Error(error: e.toString())));
       }
 
     } else if (event is Verify){
