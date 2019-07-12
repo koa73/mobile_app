@@ -26,11 +26,19 @@ class _LoginPage extends State<LoginPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-        body:  BlocBuilder<LoginEvent, LoginState>(
+        body:  BlocBuilder<BlocEvent, BlocState>(
           bloc: _bloc,
-          builder: (BuildContext context, LoginState state) {
+          builder: (BuildContext context, BlocState state) {
 
-            if ((state is UnAuthorised) || (state is Failure)) {
+            if (state is Success){
+
+              return HomePage();
+
+            } else if (state is UnRegistered){
+
+              return RegistrationPage();
+
+            } else {
 
               if (state is Failure){
                 WidgetsBinding.instance.addPostFrameCallback((_) => showDialog(
@@ -73,7 +81,7 @@ class _LoginPage extends State<LoginPage> {
                                         Padding(
                                           padding: EdgeInsets.all(10.0),
                                           child: new CountTarget(
-                                            count: state.length,
+                                            count: (state is UnAuthorised)?state.length:5,
                                             child: Targets(
                                                 color: global.highlightColor2
                                             ),
@@ -120,13 +128,6 @@ class _LoginPage extends State<LoginPage> {
                 visibility: state.progress,
               );
 
-            } else if (state is Success){
-
-              return HomePage();
-
-            } else if (state is UnRegistered){
-
-              return RegistrationPage();
             }
           },
         ),

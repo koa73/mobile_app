@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:bloc/bloc.dart';
 
 import 'src/pages/login.dart';
+import 'src/bloc/state.dart';
 import 'src/pages/restore_access.dart';
 
 
-class SimpleBlocDelegate extends BlocDelegate {
+class SimpleBlocDelegate extends BlocDelegate{
   @override
   void onEvent(Bloc bloc, Object event) {
     super.onEvent(bloc, event);
@@ -25,6 +26,7 @@ class SimpleBlocDelegate extends BlocDelegate {
 
     super.onError(bloc, error, stacktrace);
     print("Error in bloc : $error");
+    bloc.dispatch(Failure(error: error));
   }
 }
 
@@ -40,6 +42,7 @@ void main() {
 
 
 class MyApp extends StatelessWidget {
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

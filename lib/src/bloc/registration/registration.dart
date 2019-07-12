@@ -1,3 +1,3 @@
 export 'registration_bloc.dart';
-export 'registration_event.dart';
-export 'registration_state.dart';
+export '../event.dart';
+export '../state.dart';

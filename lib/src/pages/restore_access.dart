@@ -41,9 +41,9 @@ class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      body: BlocBuilder<RegEvent, RegState>(
+      body: BlocBuilder<BlocEvent, BlocState>(
           bloc: _bloc,
-          builder: (BuildContext context, RegState state) {
+          builder: (BuildContext context, BlocState state) {
             return ProgressView(
               child: SingleChildScrollView(
                 child:  BackGround(
@@ -106,7 +106,7 @@ class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
       );
   }
 
-  Widget _verifyView(RegState state){
+  Widget _verifyView(BlocState state){
     return  Wrap(
       children: <Widget>[
         InputRow(
@@ -187,7 +187,7 @@ class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
     );
   }
 
-  Widget _confirmView(RegState state){
+  Widget _confirmView(BlocState state){
     return Wrap(
       children: <Widget>[
         InputRow(

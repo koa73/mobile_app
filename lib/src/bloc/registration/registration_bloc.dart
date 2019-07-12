@@ -2,22 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
 
-import 'registration_event.dart';
-import 'registration_state.dart';
+import '../event.dart';
+import '../state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
-class RegBloc extends Bloc<RegEvent, RegState> {
+class RegBloc extends Bloc<BlocEvent, BlocState> {
 
   final Map<String, String> _reqValue = new Map();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
-  RegState get initialState => InitState();
+  BlocState get initialState => InitState();
 
 
   @override
-  Stream<RegState> mapEventToState(RegEvent event) async* {
+  Stream<BlocState> mapEventToState(BlocEvent event) async* {
 
     if (event is Confirm){
 
@@ -29,7 +29,7 @@ class RegBloc extends Bloc<RegEvent, RegState> {
 
         yield ValidValue();
         print(" Request : ${json.encode(_reqValue)}");
-        yield _showProgressWithTimeout(const Duration(milliseconds: 60000));
+        yield _showProgressWithTimeout(60);
       }
 
     } else if (event is Verify){
@@ -46,8 +46,8 @@ class RegBloc extends Bloc<RegEvent, RegState> {
       } else {
 
         yield SwitchView(view: 'Back');
-        yield _showProgressWithTimeout(const Duration(milliseconds: 45000));
-        _verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
+        yield _showProgressWithTimeout(4);
+        //_verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
       }
     }
 
@@ -116,12 +116,10 @@ class RegBloc extends Bloc<RegEvent, RegState> {
         codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
   }
 
-  RegState _showProgressWithTimeout(_timout){
+  BlocState _showProgressWithTimeout(final _timout){
 
-    Future.delayed(_timout, (){
-      print(1);
+    Future.delayed(Duration(seconds: _timout), (){
       if (this.currentState.progress) {
-        print(2);
         this.dispatch(TimeoutExcided());
       }
     });

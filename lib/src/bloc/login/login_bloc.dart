@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 
-import 'login_event.dart';
-import 'login_state.dart';
+import '../event.dart';
+import '../state.dart';
 import '../../client/auth_api.dart';
 
 
-class LoginBloc extends Bloc<LoginEvent, LoginState> {
+class LoginBloc extends Bloc<BlocEvent, BlocState> {
 
   String _code = '';
   String _username = '';
 
   @override
-  LoginState get initialState => (_username.length == 0 )?UnAuthorised()
+  BlocState get initialState => (_username.length == 0 )?UnAuthorised()
       :UnRegistered();
 
   @override
-  Stream<LoginState> mapEventToState(LoginEvent event) async* {
+  Stream<BlocState> mapEventToState(BlocEvent event) async* {
 
     if (event is KeyPushed){
 
@@ -28,36 +28,31 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           _code = _code + event.key;
         }
       }
-      yield UnAuthorised(length: _code.length, progress: ( _code.length == 5));
+
+
+      yield UnAuthorised(length: _code.length, progress: (_code.length == 5) );
 
       if (_code.length == 5){
 
         auth.getToken(password: _code)
-            .then((String result)=> this.dispatch(LoggedIn()))
-            .catchError((e) => this.dispatch(AuthError(error: e.toString())));
-
+            .then((String result)=> this.dispatch(Complete()))
+            .catchError((e) => this.dispatch(Error(error: e.toString())));
       }
     }
 
-    if (event is AuthError){
 
-      _code ='';
-      yield Failure(error: event.error);
-
+    if (event is Complete){
+      yield ShowProgress(state: false);
+      yield Success();
     }
 
-    if (event is LoggedIn){
-
-      yield Success();
-
+    if (event is Error){
+      _code ='';
+      yield Failure(error: event.error);
     }
 
     if (event is Init){
       yield UnAuthorised(length: 0, progress: false);
-    }
-
-    if (event is Progress){
-      yield UnAuthorised(length: 0, progress: true);
     }
   }
 }
