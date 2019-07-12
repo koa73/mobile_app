@@ -15,6 +15,7 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String _verificationId;
+  String _smsCode;
 
   @override
   BlocState get initialState => InitState();
@@ -97,8 +98,8 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
   }
 
   bool _confirmValidate(String code){
-    _reqValue['code'] = code.replaceAll(new RegExp(r'\D'), '');
-    return _reqValue['code'].length != 6;
+    _smsCode = code.replaceAll(new RegExp(r'\D'), '');
+    return _smsCode.length != 6;
   }
 
   _verifyPhoneNumber(String phoneNumber) async {
@@ -140,7 +141,7 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
 
     final AuthCredential credential = PhoneAuthProvider.getCredential(
       verificationId: _verificationId,
-      smsCode: _reqValue['code'],
+      smsCode: _smsCode,
     );
     final FirebaseUser user = await _auth.signInWithCredential(credential);
     return await user.getIdToken(refresh: true);
