@@ -51,7 +51,7 @@ class LoginBloc extends Bloc<BlocEvent, BlocState> {
       yield Failure(error: event.error);
     }
 
-    if (event is Init){
+    if (event is ClearError){
       yield UnAuthorised(length: 0, progress: false);
     }
   }

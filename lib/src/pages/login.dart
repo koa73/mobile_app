@@ -11,6 +11,7 @@ import '../pages/home.dart';
 import '../pages/registration.dart';
 import '../bloc/login/login.dart';
 import '../globals.dart' as global;
+import '../widgets/alert.dart';
 
 class LoginPage extends StatefulWidget {
 
@@ -18,7 +19,7 @@ class LoginPage extends StatefulWidget {
   _LoginPage createState() => _LoginPage();
 }
 
-class _LoginPage extends State<LoginPage> {
+class _LoginPage extends State<LoginPage> with ShowAlertDialog{
 
   LoginBloc _bloc;
 
@@ -41,26 +42,10 @@ class _LoginPage extends State<LoginPage> {
             } else {
 
               if (state is Failure){
-                WidgetsBinding.instance.addPostFrameCallback((_) => showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    // return object of type Dialog
-                    return AlertDialog(
-                      title: new Text("Login error"),
-                      content: new Text(state.error),
-                      actions: <Widget>[
-                        // usually buttons at the bottom of the dialog
-                        new FlatButton(
-                          child: new Text("Close"),
-                          onPressed: () {
-                            _bloc.dispatch(Init());
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ));
+                WidgetsBinding.instance.addPostFrameCallback((_){
+                  //_showAlert(context, state.error);
+                  showAlert(context, state.error, _bloc);
+                });
               }
 
               return ProgressView(
@@ -127,7 +112,6 @@ class _LoginPage extends State<LoginPage> {
                 ),
                 visibility: state.progress,
               );
-
             }
           },
         ),

@@ -5,7 +5,7 @@ abstract class BlocEvent extends Equatable {
   BlocEvent([List props = const []]) : super(props);
 }
 
-class Init extends BlocEvent{}
+class ClearError extends BlocEvent{}
 
 class Complete extends BlocEvent{}
 
