@@ -10,8 +10,9 @@ import '../widgets/progress.dart';
 import '../pages/home.dart';
 import '../pages/registration.dart';
 import '../bloc/login/login.dart';
-import '../globals.dart' as global;
 import '../widgets/alert.dart';
+import '../globals.dart' as global;
+
 
 class LoginPage extends StatefulWidget {
 

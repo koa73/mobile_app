@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:bloc/bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../event.dart';
 import '../state.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../../security/password.dart';
 
 
 class RegBloc extends Bloc<BlocEvent, BlocState> {
 
   final Map<String, String> _reqValue = new Map();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  String _verificationId;
 
   @override
   BlocState get initialState => InitState();
@@ -28,8 +31,16 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
       } else {
 
         yield ValidValue();
-        print(" Request : ${json.encode(_reqValue)}");
+
         yield _showProgressWithTimeout(60);
+        _signInWithPhoneNumber()
+            .then((String credential){
+              print("Credentials : $credential");
+              _reqValue['credential'] = credential;
+              print(" Request : ${json.encode(_reqValue)}");
+        })
+            .catchError((e) => this.dispatch(Error(error: e.toString())));
+
       }
 
     } else if (event is Verify){
@@ -47,7 +58,7 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
 
         yield SwitchView(view: 'Back');
         yield _showProgressWithTimeout(4);
-        //_verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
+        _verifyPhoneNumber(event.phone.replaceAll(new RegExp(r'\D'), ''));
       }
     }
 
@@ -57,7 +68,14 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
 
     if (event is VerificationCompleted){  yield ShowProgress(state: false);}
 
-    if (event is TimeoutExcided){ yield ShowProgress(state: false);}
+    if (event is TimeoutExcided){
+
+      if (event.error.length > 0) {
+        yield Failure(error: 'Timeout excided.', progress: false);
+      } else {
+        yield ShowProgress(state: false);
+      }
+    }
   }
 
   bool _emailValidate(String email){
@@ -72,13 +90,15 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
   }
 
   bool _passwordValidate(String password){
-    _reqValue['password'] = password.replaceAll(new RegExp(r'\D'), '');
-    return _reqValue['password'].length != 5;
+
+    final String _password =  password.replaceAll(new RegExp(r'\D'), '');
+    _reqValue['password'] = pwd.encodePasswordPassword(_password);
+    return _password.length != 5;
   }
 
   bool _confirmValidate(String code){
     _reqValue['code'] = code.replaceAll(new RegExp(r'\D'), '');
-    return _reqValue['code'].length != 5;
+    return _reqValue['code'].length != 6;
   }
 
   _verifyPhoneNumber(String phoneNumber) async {
@@ -86,8 +106,7 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
     final PhoneVerificationCompleted verificationCompleted =
         (AuthCredential phoneAuthCredential) {
       this.dispatch(VerificationCompleted());
-      print('Received phone auth credential: $phoneAuthCredential');
-    };
+      };
 
     final PhoneVerificationFailed verificationFailed =
         (AuthException authException) {
@@ -98,12 +117,13 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
 
     final PhoneCodeSent codeSent =
         (String verificationId, [int forceResendingToken]) async {
-
+      _verificationId = verificationId;
       print("Verification ID : $verificationId");
     };
 
     final PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
         (String verificationId) {
+      _verificationId = verificationId;
       print("CodeAutoRetrievalTimeout : verificationId");
     };
 
@@ -116,9 +136,19 @@ class RegBloc extends Bloc<BlocEvent, BlocState> {
         codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
   }
 
-  BlocState _showProgressWithTimeout(final _timout){
+  Future<String> _signInWithPhoneNumber() async {
 
-    Future.delayed(Duration(seconds: _timout), (){
+    final AuthCredential credential = PhoneAuthProvider.getCredential(
+      verificationId: _verificationId,
+      smsCode: _reqValue['code'],
+    );
+    final FirebaseUser user = await _auth.signInWithCredential(credential);
+    return await user.getIdToken(refresh: true);
+  }
+
+  BlocState _showProgressWithTimeout(final _timeout){
+
+    Future.delayed(Duration(seconds: _timeout), (){
       if (this.currentState.progress) {
         this.dispatch(TimeoutExcided());
       }

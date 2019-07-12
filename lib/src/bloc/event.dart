@@ -15,6 +15,8 @@ class Error extends BlocEvent {
 }
 
 class TimeoutExcided extends BlocEvent {
+  final String error;
+  TimeoutExcided({this.error = ''}) : super([error]);
 }
 
 // Login page event

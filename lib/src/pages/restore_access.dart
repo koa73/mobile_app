@@ -10,6 +10,7 @@ import '../widgets/input_row.dart';
 import '../bloc/registration/registration.dart';
 import '../widgets/progress.dart';
 import '../widgets/keyboard_hider.dart';
+import '../widgets/alert.dart';
 import '../globals.dart' as global;
 
 class RestorePage extends StatefulWidget {
@@ -18,7 +19,7 @@ class RestorePage extends StatefulWidget {
   _RestorePage createState() => _RestorePage();
 }
 
-class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
+class _RestorePage extends State<RestorePage> with KeyboardHiderMixin, ShowAlertDialog {
 
   final RegBloc _bloc = RegBloc();
   final TextEditingController _emailController = TextEditingController();
@@ -27,7 +28,7 @@ class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
   final TextEditingController _passwordController = new MaskedTextController(
       mask: '00000');
   final TextEditingController _confirmController = new MaskedTextController(
-      mask: '00000');
+      mask: '000000');
 
   final TextStyle  _hintStyle = TextStyle(
       color: global.foregroundColor.withOpacity(0.3),
@@ -44,64 +45,79 @@ class _RestorePage extends State<RestorePage> with KeyboardHiderMixin {
       body: BlocBuilder<BlocEvent, BlocState>(
           bloc: _bloc,
           builder: (BuildContext context, BlocState state) {
-            return ProgressView(
-              child: SingleChildScrollView(
-                child:  BackGround(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          padding: const EdgeInsets.only(top: 80.0, bottom: 50.0),
-                          child: Center(
-                            child: new Column(
-                              children: <Widget>[
-                                Container(
-                                  height: 128.0,
-                                  width: 128.0,
-                                  child: new CircleAvatar(
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: global.foregroundColor,
-                                    radius: 100.0,
-                                    child: Icon(
-                                      Icons.person,
-                                      size: 60.0,
-                                      color: global.foregroundColor,
+
+            if (state is Success) {
+
+
+
+            } else {
+
+              if (state is Failure){
+                WidgetsBinding.instance.addPostFrameCallback((_){
+                  //_showAlert(context, state.error);
+                  showAlert(context, state.error, _bloc);
+                });
+              }
+              return ProgressView(
+                child: SingleChildScrollView(
+                  child:  BackGround(
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            padding: const EdgeInsets.only(top: 80.0, bottom: 50.0),
+                            child: Center(
+                              child: new Column(
+                                children: <Widget>[
+                                  Container(
+                                    height: 128.0,
+                                    width: 128.0,
+                                    child: new CircleAvatar(
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: global.foregroundColor,
+                                      radius: 100.0,
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 60.0,
+                                        color: global.foregroundColor,
+                                      ),
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: global.foregroundColor,
+                                        width: 1.0,
+                                      ),
+                                      shape: BoxShape.circle,
+                                      //image: DecorationImage(image: global.logo)
                                     ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: global.foregroundColor,
-                                      width: 1.0,
+                                  new Padding(
+                                    padding: const EdgeInsets.all(15.0),
+                                    child: new Text(
+                                      "Smart Shopper",
+                                      style: TextStyle(
+                                        color: global.foregroundColor,
+                                      ),
                                     ),
-                                    shape: BoxShape.circle,
-                                    //image: DecorationImage(image: global.logo)
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: new Text(
-                                    "Smart Shopper",
-                                    style: TextStyle(
-                                      color: global.foregroundColor,
-                                    ),
-                                  ),
-                                )
-                              ],
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                        ),  // Logo
-                        RotatingCell(
-                          frontWidget: _verifyView(state),
-                          backWidget: _confirmView(state),
-                          cellSize: Size(MediaQuery.of(context).size.width, 250),
-                          padding: EdgeInsets.all(0.0),
-                          stateStream: _bloc.state,
-                        )
-                      ],
-                    )
+                          ),  // Logo
+                          RotatingCell(
+                            frontWidget: _verifyView(state),
+                            backWidget: _confirmView(state),
+                            cellSize: Size(MediaQuery.of(context).size.width, 250),
+                            padding: EdgeInsets.all(0.0),
+                            stateStream: _bloc.state,
+                          )
+                        ],
+                      )
+                  ),
                 ),
-              ),
-              visibility: state.progress,
-            );
+                visibility: state.progress,
+              );
+            }
+
           })
       );
   }

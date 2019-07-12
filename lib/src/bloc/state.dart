@@ -24,11 +24,10 @@ class ShowProgress extends  BlocState {
 
 class Failure extends BlocState {
   final String error;
-  final int length;
   final bool progress;
 
-  Failure({@required this.error, this.length = 0, this.progress = false})
-      : super([error, length, progress]);
+  Failure({@required this.error,  this.progress = false})
+      : super([error, progress]);
 
   @override
   String toString() => 'Failure { error: $error }';
